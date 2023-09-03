@@ -17,6 +17,7 @@
 #==================================#
 #### [1.] Paquetes y entorno ####  
 #==================================#
+# Limpieza del entorno de trabajo e instalación de paquetes
 rm(list=ls())
 install.packages("pacman")
 library(pacman)
@@ -59,7 +60,10 @@ for (i in 1:10) {
 }
 
 format(object.size(df_final), units = "MB")
-write_csv(df_final, "/Users/ricardoandressilvatorres/Documents/GitHub/BigData-MachineLearning202320/Taller 1/df_final.csv")
+write_csv(df_final, "/Users/ricardoandressilvatorres/Documents/GitHub/
+                      BigData-MachineLearning202320/Taller 1/stores/df_final.csv")
+
+
 
 
 
