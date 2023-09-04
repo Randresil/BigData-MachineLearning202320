@@ -51,3 +51,42 @@ boxplot(log_salario_mensual ~ sex, data = df_filtered,
         ylab = "Income",
         col = c("lightblue", "lightgreen"))
 ## si les gusta se puede hacer asi respecto a informal y tambien respecto a clase (urbano y rural)
+
+
+
+
+
+
+
+## El ejercicio de regresion
+
+
+df_filtered$age2 <- df_filtered$age^2
+summary(df_filtered$age2)
+summary(df_filtered$age)
+
+model1 <- lm(log_salario_hora ~ age + age2 , data=df_filtered)
+summary (model1)
+stargazer(reg,type="text")
+
+## todas dan muy significativas, efectivamente el cuadrado es negativo y corrobora
+## que la relacion es concava. Se cumple lo que la teoria menciona del descenso de ingreso
+## a partir de edades altas (50 años)
+ ## se interpreta log-lin ( un cambio B*100 es un cambio de y%)
+
+## le podemos añadir edad al cubo a ver si es mas pronunciada la relacion de disminucion
+## de ingreso en la vejez
+
+
+library(ggplot2)
+# Crear un gráfico de dispersión
+ggplot(df_filtered, aes(x = age2, y = log_salario_hora)) +
+  geom_point() +
+  labs(
+    title = "Gráfico de Dispersión\nEdad al Cuadrado vs Ingreso hora",
+    x = "Edad al Cuadrado",
+    y = "Ingreso"
+  )
+
+## en este scatter la relacion no es tan clara
+## se remueven 1286 por missing value (warning)
