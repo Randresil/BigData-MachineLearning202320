@@ -63,7 +63,3 @@ format(object.size(df_final), units = "MB")
 write_csv(df_final, "/Users/ricardoandressilvatorres/Documents/GitHub/
                       BigData-MachineLearning202320/Taller 1/stores/df_final.csv")
 
-
-
-
-
