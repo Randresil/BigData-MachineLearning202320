@@ -260,10 +260,24 @@ ggplot(df_filtered, aes(x = age2, y = log_salario_hora)) +
 
 
 
-## Para hacer el FWL 3(b)
+## Para hacer el FWL 4(b) El problema de mujer
+
+## El punto a
+
+ df_filtered$female <- 1 - df_filtered$sex
+
+regmujer<- lm(log_salario_hora ~ female, data=df_filtered)
+summary(regmujer)
+
+reghombre<- lm(log_salario_hora ~ sex, data=df_filtered)
+summary(reghombre)
+## raro revisar con los demas datos (hombre gana menos que mujer)
+
+regmujer_controles<- lm(log_salario_hora ~ female + sizeFirm + p6870 + oficio + depto + college+ cotPension, data=df_filtered)
+summary(regmujer_controles)
+
 
 ## deberia funcionar, pero hay un problema de lenght y match
-
 pic1<- lm(female ~ sizeFirm + p6870 + oficio + depto + college+ cotPension, df_filtered)
 residuals1 <- residuals(pic1)
 
