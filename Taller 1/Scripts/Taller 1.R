@@ -71,6 +71,8 @@ write_csv(df_final, "/Users/ricardoandressilvatorres/Documents/GitHub/
 df_filtered <- subset(df_final, age >= 18 & dsi == 0)
 ## dsi 0 es solo personas que no esten desempleadas
 
+# Crea la nueva variable "salario_nuevo" y reemplaza los valores faltantes con la media
+df_filtered$log_salario_completo_hora <- ifelse(is.na(df_filtered$log_salario_hora), media_salario_hora, df_filtered$log_salario_hora)
 
 sum "y_ingLab_m"
 mean (y_ingLab_m)
@@ -289,6 +291,44 @@ reg_mujer_controles2 <- lm (residuals2 ~ residuals1 )
 stargazer(reg1,reg2,type="text",digits=7) 
 
 
+## ------- BOOTSRAP DE LA REGRESION(COEFICIENTE DE FEMALE)-------##
+mod1<- lm(log_salario_completo_hora ~ female +sizeFirm + p6870 + oficio + depto + college+ cotPension, df_filtered)
+stargazer(mod1,type="text", omit.stat=c("ser","f","adj.rsq"))
+
+str(mod1)
+
+mod1$coefficients
+
+
+set.seed(123)
+
+B<-1000 # Number of Repetions()
+
+
+eta_mod1<-rep(0,B)#this is an empty vector where we are going to save our elasticity estimates
+
+
+for(i in 1:B){
+  
+  db_sample<- sample_frac(df_filtered,size=1,replace=TRUE) #takes a sample with replacement of the same size of the original sample (1 or 100%)
+  
+  f<-lm(log_salario_completo_hora ~ female +sizeFirm + p6870 + oficio + depto + college+ cotPension,db_sample)# estimates the models
+  
+  coefs<-f$coefficients[2] # gets the coefficient of interest that coincides with the elasticity of demand
+  
+  eta_mod1[i]<-coefs #saves it in the above vector
+}
+
+length(eta_mod1)
+
+plot(hist(eta_mod1))
+
+## este es el valor
+mean(eta_mod1)
+
+sqrt(var(eta_mod1))
+
+print(coefs)
 
 
 ##---------  Train and sample (validation) Punto 5 ------------##
