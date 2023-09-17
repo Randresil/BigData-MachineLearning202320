@@ -22,15 +22,19 @@ rm(list=ls())
 install.packages("pacman")
 library(pacman)
 
-p_load(rvest, tidyverse, skimr, jsonlite)
+p_load(rvest, tidyverse, skimr, jsonlite, stargazer, hrbrthemes)
 
-
+getwd()
+setwd("~/Documents/GitHub/BigData-MachineLearning202320")
+list.files()
 
 #==================================#
 #### [2.] Web Scraping ####  
 #==================================#
 browseURL("https://ignaciomsarmiento.github.io/GEIH2018_sample/", getOption("browser"))
 # PAG WEB: https://ignaciomsarmiento.github.io/GEIH2018_sample/
+# PAG WEB DICT: https://ignaciomsarmiento.github.io/GEIH2018_sample/dictionary.html
+# PAG WEB LABELS: https://ignaciomsarmiento.github.io/GEIH2018_sample/labels.html
 # PAG de ayuda: https://www.projectpro.io/recipes/append-output-from-for-loop-dataframe-r
 
 # Definición de dataframe vacio
@@ -65,35 +69,51 @@ write_csv(df_final, "/Users/ricardoandressilvatorres/Documents/GitHub/
 
 
 
-## Limpieza de los datos
+#===========================================#
+#### [3.] Limpieza de los datos y graphs ####  
+#===========================================#
+df_final <- read.csv("~/Documents/GitHub/BigData-MachineLearning202320/Taller 1/stores/df_final.csv")
+dim(df_final)
+glimpse(df_final)
 
-
+# Valores de dsi:	=1 if unemployed; =0 otherwise
+c("dsi", "age") %in% names(df_final)
 df_filtered <- subset(df_final, age >= 18 & dsi == 0)
-## dsi 0 es solo personas que no esten desempleadas
+
+# Media de salarios
+mean(df_filtered$y_ingLab_m, na.rm = T)
+mean(df_filtered$y_salary_m, na.rm = T)
+mean(df_filtered$y_total_m, na.rm = T)
+
+# Estad Descriptivas con Stargazer
+stargazer(df_filtered, type = "text")
 
 # Crea la nueva variable "salario_nuevo" y reemplaza los valores faltantes con la media
 media_salario_hora <- mean(df_filtered$log_salario_hora, na.rm = TRUE)
 df_filtered$log_salario_completo_hora <- ifelse(is.na(df_filtered$log_salario_hora), media_salario_hora, df_filtered$log_salario_hora)
 
-sum "y_ingLab_m"
-mean (y_ingLab_m)
+# Variables de salario disponibles:
+# ingtot -> ingreso total
+# ingtotes -> Ingreso total imputado
+# ingtotob -> Ingreso total observado
+# y_ingLab_m -> Labor income salaried - Nominal Monthly
+# y_ingLab_m_ha -> Labor income salaried - Nominal Hourly
+# y_salary_m -> Salary - Nominal Monthly
+# y_total_m -> Income Salaried + indep total + nominal monthly
+# y_total_m_ha -> Income Salaried + indep total + nominal hourly
 
 
-## Descargamos para hacer ggplot y estadisticas descriptivas
-install.packages("tidyr")
-installed.packages("ggplot2")
+## Histograma de referencia - Con Comando de geom_histogram :)
+# Referencia: https://r-graph-gallery.com/220-basic-ggplot2-histogram.html
+ggplot(data=df_filtered, aes(x= y_total_m))+
+  geom_histogram(bins = 25, fill="#69b3a2", color="#e9ecef") +
+  theme_ipsum() +
+  labs(x="Ingresos Mensuales") +
+  ggtitle("Histograma de ingresos mensuales")
 
-library(tidyr)
-library(ggplot2)
-
-##
-
-## No se observa porque toca volver logaritmo los ingresos
-ggplot(data=df_filtered, aes(x=age, y= y_ingLab_m))+
-  labs(x="edad", y="ingresos mensuales")
 
 skim(df_filtered)
-skim (df)
+skim(df)
 skim(db$age)
 
 
@@ -102,7 +122,7 @@ summary(df_filtered$age)
 summary(df_filtered$y_ingLab_m_ha)
 summary(df_filtered$y_ingLab_m)
 
-##
+
 # Create a boxplot to visualize the distribution and quartiles of income
 ## No se ve bien porque hay mucha varianza.
 boxplot(df_filtered$y_ingLab_m_ha,
@@ -118,19 +138,22 @@ boxplot(df_filtered$y_ingLab_m,
         col = "lightblue",
         border = "red",
         horizontal = TRUE)
-##
+
+
 # Crear una nueva variable de ingreso limitada a 1000 o menos ( se trunca en )
 df_filtered$ingreso_limitado2 <- ifelse(df_filtered$y_ingLab_m <=12000 , 
                                         df_filtered$y_ingLab_m, 12000)
 
 ## Algo quedo mal, use arbitrariamente el 12000
-
-
 df_filtered$ingreso_limitado2 <- ifelse(df_filtered$y_ingLab_m <=12000 , 
                                         df_filtered$y_ingLab_m, 12000)
+
 ## creo variables logaritmicas
 df_filtered$log_salario_mensual <- log(df_filtered$y_ingLab_m)
 df_filtered$log_salario_hora <- log(df_filtered$y_ingLab_m_ha)
+
+
+
 
 boxplot(df_filtered$log_salario_mensual,
         main = "Income Distribution",
@@ -218,11 +241,10 @@ ggplot(data=df_filtered, aes(x= p6210, y= log_salario_mensual ))+
   labs(x="edad", y="ingresos mensuales")
 
 
-
-##________  3- Age-wage profile-_________
-
+#===========================================#
+#### [4.]  Ejercicio: Age-wage profile ####  
+#===========================================#
 ## El ejercicio de regresion 
-
 
 df_filtered$age2 <- df_filtered$age^2
 summary(df_filtered$age2)
