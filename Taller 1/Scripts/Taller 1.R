@@ -72,6 +72,7 @@ df_filtered <- subset(df_final, age >= 18 & dsi == 0)
 ## dsi 0 es solo personas que no esten desempleadas
 
 # Crea la nueva variable "salario_nuevo" y reemplaza los valores faltantes con la media
+media_salario_hora <- mean(df_filtered$log_salario_hora, na.rm = TRUE)
 df_filtered$log_salario_completo_hora <- ifelse(is.na(df_filtered$log_salario_hora), media_salario_hora, df_filtered$log_salario_hora)
 
 sum "y_ingLab_m"
@@ -331,28 +332,17 @@ sqrt(var(eta_mod1))
 print(coefs)
 
 
-##---------  Train and sample (validation) Punto 5 ------------##
+
+##-------------------- SI SITRVE ( SAMPLE AND TRAIN)-----
 
 ## Como en clase
 sample <- sample(c(TRUE, FALSE), nrow(df_filtered), replace=TRUE, prob=c(0.7,0.3))
 head(sample)
 
-train  <- completa[sample, ] #train sample those that are TRUE in the sample index
-test   <- completa[!sample, ] #test sample those that are FALSE in the sample index
+train  <- df_filtered[sample, ] #train sample those that are TRUE in the sample index
+test   <- df_filtered[!sample, ] #test sample those that are FALSE in the sample index
 dim(train)
 
-
-reg1<-lm(log_salario_hora ~ age + age2 + age3 ,data=train)
-summary(reg1)
-
-coef (reg1)
-
-paste("Coef:", mean(train$log_salario_hora,na.rm=TRUE))
-
-test$reg1<-predict(reg1,newdata = test)
-
-with(test,mean((log_salario_hora-reg1)^2,na.rm=TRUE))
-## sale el MSE queremos que sea lo mas bajo posible. Intentamos modelos mas complejos
 
 
 model4<-lm(log_salario_hora~poly(age,8,raw=TRUE):poly(maxEducLevel,3,raw=TRUE)
@@ -366,12 +356,142 @@ test$model4<-predict(model4,newdata = test)
 
 with(test,mean((log_salario_hora-model4)^2,na.rm=TRUE))
 
-## aqui el MSE bajo bastante mas. Sigue siendo alto
+## aqui el error estandar bajo bastante mas. Sigue siendo alto
+## El error es de 0,336
 
-## intentar con distintas especificaciones, polinomios, interacciones y variables
+## intentar con distintas especificaciones
 
 
 
+model6 <- lm(log_salario_hora ~ poly(age, 8, raw = TRUE) + poly(maxEducLevel, 3, raw = TRUE) + poly(fweight, 3, raw = TRUE) + poly(experiencia_ajustada2, 3, raw = TRUE), data = train)
+
+
+## CREAR EXPERIENCIA (la que usamos es experiencia_ajustada2)
+
+
+df_filtered$resta_edad <- ifelse(df_filtered$age > 65, df_filtered$age - 65, 0)
+
+df_filtered$experiencia_ajustada2 <- ifelse(df_filtered$age > 65, df_filtered$age - df_filtered$resta_edad - df_filtered$maxEducLevel, df_filtered$age - df_filtered$maxEducLevel)
+
+
+
+
+
+model5 <- lm(log_salario_hora ~ poly(age, 3, raw = TRUE) + 
+               poly(maxEducLevel, 2, raw = TRUE) + 
+               poly(fweight, 3, raw = TRUE) + 
+               sizeFirm + 
+               regSalud + 
+               clase, 
+             data = train)
+model5
+
+coef (model5)
+paste("Coef:", mean(train$log_salario_hora,na.rm=TRUE))
+## aqui genero la prediccion de mis datos que entrene sobre el tes
+test$model5<-predict(model5,newdata = test)
+
+with(test,mean((log_salario_hora-model4)^2,na.rm=TRUE))
+
+
+model9 <- lm(log_salario_hora ~ poly(age, 2, raw = TRUE) + 
+               poly(maxEducLevel, 2, raw = TRUE) + 
+               clase, 
+             data = train)
+model9
+
+coef (model9)
+paste("Coef:", mean(train$log_salario_hora,na.rm=TRUE))
+## aqui genero la prediccion de mis datos que entrene sobre el tes
+test$model9<-predict(model9,newdata = test)
+
+with(test,mean((log_salario_hora-model9)^2,na.rm=TRUE))
+
+## MSE de 0,3625 es mas alto
+
+##--------------   hhs --------##
+
+model20 <- lm(log_salario_hora ~ poly(age, 3, raw = TRUE):
+                poly(maxEducLevel, 2, raw = TRUE) + 
+                poly(experiencia_ajustada,3,raw=TRUE) +
+                sizeFirm + 
+                regSalud + 
+                clase, 
+              data = train)
+model20
+
+coef (model20)
+paste("Coef:", mean(train$log_salario_hora,na.rm=TRUE))
+## aqui genero la prediccion de mis datos que entrene sobre el tes
+test$model20<-predict(model20,newdata = test)
+
+with(test,mean((log_salario_hora-model20)^2,na.rm=TRUE))
+
+## Bajo a 0,3192 hasta el momento de los mejores
+
+
+model21 <- lm(log_salario_hora ~ poly(age, 3, raw = TRUE) +
+                poly(maxEducLevel, 2, raw = TRUE):
+                poly(experiencia_ajustada,3,raw=TRUE) +
+                sizeFirm + 
+                regSalud + 
+                formal +
+                p6620 +
+                clase, 
+              data = train)
+model21
+
+coef (model21)
+paste("Coef:", mean(train$log_salario_hora,na.rm=TRUE))
+## aqui genero la prediccion de mis datos que entrene sobre el tes
+test$model21<-predict(model21,newdata = test)
+
+with(test,mean((log_salario_hora-model21)^2,na.rm=TRUE))
+
+## Volvio a bajar a 0,3144
+
+## ----------- ULTIMA----------##
+
+model2 <- lm(log_salario_hora ~ poly(age, 3, raw = TRUE) +
+               data = train)
+
+model2 <- lm(log_salario_hora ~ poly(age, 3, raw = TRUE), data = train)
+
+model2
+
+coef (model22)
+paste("Coef:", mean(train$log_salario_hora,na.rm=TRUE))
+## aqui genero la prediccion de mis datos que entrene sobre el tes
+test$model2<-predict(model2,newdata = test)
+
+with(test,mean((log_salario_hora-model2)^2,na.rm=TRUE))
+
+## MSE ALTO DE 0,49
+
+## no es necesario controlar por dearatmento todos son de bogota.
+##depto microEmpresa regSalud sizeFirm ( algunas variables de interes)
+
+##------- JUNTAR TODO EN UNO--------#
+
+
+
+mse2 <- with(test,mean((log_salario_hora-model4)^2,na.rm=TRUE))
+mse4 <- with(test,mean((log_salario_hora-model4)^2,na.rm=TRUE))
+mse9 <- with(test,mean((log_salario_hora-model9)^2,na.rm=TRUE))
+mse20 <- with(test,mean((log_salario_hora-model20)^2,na.rm=TRUE))
+mse21 <- with(test,mean((log_salario_hora-model21)^2,na.rm=TRUE))
+
+
+#put them in a vector
+mse<-c(mse2,mse4,mse9,mse20,mse21)
+
+#create a data frame
+db<-data.frame(model=factor(c("model2","model4","model9","model20","model21"),ordered=TRUE),
+               MSE=mse)
+db
+
+## se esocge el modelo 21 (5) tiene el MSE MAS BAJO. (0,31447)
+## el segundo modelo con el MSE mas bajo es el 20  (0,3192)
 
 
 
