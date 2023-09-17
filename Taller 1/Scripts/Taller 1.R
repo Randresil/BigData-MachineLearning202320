@@ -69,9 +69,9 @@ write_csv(df_final, "/Users/ricardoandressilvatorres/Documents/GitHub/
 
 
 
-#==================================#
-#### [3.] Limpieza de los datos ####  
-#==================================#
+#===========================================#
+#### [3.] Limpieza de los datos y graphs ####  
+#===========================================#
 df_final <- read.csv("~/Documents/GitHub/BigData-MachineLearning202320/Taller 1/stores/df_final.csv")
 dim(df_final)
 glimpse(df_final)
@@ -94,7 +94,7 @@ stargazer(df_filtered, type = "text")
 # ingtotes -> Ingreso total imputado
 # ingtotob -> Ingreso total observado
 # y_ingLab_m -> Labor income salaried - Nominal Monthly
-# y_ingLab_m_ha -> Labor income salaried - Monthly nominal
+# y_ingLab_m_ha -> Labor income salaried - Nominal Hourly
 # y_salary_m -> Salary - Nominal Monthly
 # y_total_m -> Income Salaried + indep total + nominal monthly
 # y_total_m_ha -> Income Salaried + indep total + nominal hourly
@@ -119,7 +119,7 @@ summary(df_filtered$age)
 summary(df_filtered$y_ingLab_m_ha)
 summary(df_filtered$y_ingLab_m)
 
-##
+
 # Create a boxplot to visualize the distribution and quartiles of income
 ## No se ve bien porque hay mucha varianza.
 boxplot(df_filtered$y_ingLab_m_ha,
@@ -135,19 +135,22 @@ boxplot(df_filtered$y_ingLab_m,
         col = "lightblue",
         border = "red",
         horizontal = TRUE)
-##
+
+
 # Crear una nueva variable de ingreso limitada a 1000 o menos ( se trunca en )
 df_filtered$ingreso_limitado2 <- ifelse(df_filtered$y_ingLab_m <=12000 , 
                                         df_filtered$y_ingLab_m, 12000)
 
 ## Algo quedo mal, use arbitrariamente el 12000
-
-
 df_filtered$ingreso_limitado2 <- ifelse(df_filtered$y_ingLab_m <=12000 , 
                                         df_filtered$y_ingLab_m, 12000)
+
 ## creo variables logaritmicas
 df_filtered$log_salario_mensual <- log(df_filtered$y_ingLab_m)
 df_filtered$log_salario_hora <- log(df_filtered$y_ingLab_m_ha)
+
+
+
 
 boxplot(df_filtered$log_salario_mensual,
         main = "Income Distribution",
@@ -235,11 +238,10 @@ ggplot(data=df_filtered, aes(x= p6210, y= log_salario_mensual ))+
   labs(x="edad", y="ingresos mensuales")
 
 
-
-##________  3- Age-wage profile-_________
-
+#===========================================#
+#### [4.]  Ejercicio: Age-wage profile ####  
+#===========================================#
 ## El ejercicio de regresion 
-
 
 df_filtered$age2 <- df_filtered$age^2
 summary(df_filtered$age2)
