@@ -117,3 +117,4 @@ regmujer<- lm(log_salario_hora ~ female, data=df_filtered)
 Realizaremos una comparación de los salarios sin controles, otras estimaciones con controles, con el objetivo de clarificar si esta brecha se genera a raíz de la diferenciación entre trabajadores, y cómo última cuestión compararemos la edad “peak” de los hombres con el de las mujeres.
 
 Como una primera aproximación ante el problema se realizó la siguiente regresión *log⁡(salario) = β_(0 )+ β_(1 ) Female + *u; en esta podemos ver que se da un coeficiente de – 4%, pensando en que nuestra variable base es hombre tenemos que en promedio las mujeres están recibiendo 4% menos salario que los hombres. 
+ 
