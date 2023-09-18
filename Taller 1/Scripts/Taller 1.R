@@ -248,6 +248,7 @@ pie(counts, labels = c("Doesn't Work in Small Company", "Works in Small Company"
 # Páginas de ayuda para graficar intervalos de confianza a partir de bootstrap
 # https://www.geeksforgeeks.org/bootstrap-confidence-interval-with-r-programming/
 # https://www.geeksforgeeks.org/how-to-plot-a-confidence-interval-in-r/
+sapply(df_filtered, function(x) sum(is.na(x)))
 
 # Creación de variable de edad al cuadrado
 df_filtered$age2 <- df_filtered$age^2
@@ -270,7 +271,9 @@ boot.W <- function(data, index){
 # Fijación de semilla para reproducir resultados
 set.seed(123456)
 result_boot <- boot(df_filtered, boot.W, 1000)
-ci <- boot.ci(result_boot, conf = 0.95, type = "basic")
+result_boot
+
+boot.ci(result_boot, conf = 0.95, type = "basic")
 
 # Tenemos intervalos para B0, AGE, AGE2 iguales a: 0.0684885709, 0.0039112949, 0.0000508653
 # df_filtered <- df_filtered %>% mutate(reg_values = model1$fitted.values, lowAW = )
@@ -283,14 +286,14 @@ ci <- boot.ci(result_boot, conf = 0.95, type = "basic")
 ## de ingreso en la vejez
 
 # Crear un gráfico de dispersión
-ggplot(df_filtered, aes(x = age2, y = log_salario_hora)) +
+ggplot(df_filtered, aes(x = age, y = log_salario_hora)) +
   geom_point() +
-  labs(
-    title = "Gráfico de Dispersión\nEdad al Cuadrado vs Ingreso por Hora",
-    x = "Edad al Cuadrado",
-    y = "Ingreso por Hora") +
-  geom_smooth(method = lm, data = df_filtered, 
-              formula = log_salario_hora ~ age + age2, na.rm = T)
+  labs(title = "Gráfico de Dispersión\nEdad al Cuadrado vs Ingreso por Hora",
+       x = "Edad al Cuadrado",
+       y = "Ingreso por Hora") +
+  geom_smooth(method = "lm", formula = y ~ x + I(x^2), se = TRUE) +
+  coord_cartesian(xlim = c(min(df_filtered$age), max(df_filtered$age))) +
+  theme_bw()
 
 #iii) Bootstrap 
 
@@ -486,8 +489,10 @@ summary (
   lm(residuals1.2 ~ residuals1.1, data = df_filtered)
 )$coef
 
-
-##-------------------- SI SITRVE ( SAMPLE AND TRAIN)-----
+#================================================#
+#### [6.]  Ejercicio:  Predicting earnings    ####  
+#================================================#
+##-------------------- SI SIRVE (SAMPLE AND TRAIN)
 
 ## Como en clase
 sample <- sample(c(TRUE, FALSE), nrow(df_filtered), replace=TRUE, prob=c(0.7,0.3))
