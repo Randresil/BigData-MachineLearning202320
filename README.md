@@ -1,6 +1,6 @@
 
 ---
-title: 'Problem Set #1'
+ 'Problem Set #1'
 author: 'Elaborado por: Ricardo Silva, Fedrico Camacho, Andrés Chavarro & Juan David
   Vélez P.'
 date: "2023-09-18"
