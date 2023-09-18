@@ -105,7 +105,7 @@ df_filtered <- df_filtered %>% select(c("directorio", "secuencia_p", "orden", "c
                                         "mes", "estrato1", "sex", "age", "y_ingLab_m_ha", "y_ingLab_m", "y_total_m", 
                                         "y_total_m_ha", "college", "depto", "dsi", "formal", "maxEducLevel", 
                                         "p6050", "p6426", "regSalud", "sizeFirm", "totalHoursWorked",
-                                        "microEmpresa", "fweight", "p6620", "cotPension") )  
+                                        "microEmpresa", "fweight", "p6620", "cotPension", "p6870", "oficio"))  
 
 # Estad Descriptivas con Stargazer
 # Paginas ayuda paquete:
@@ -119,7 +119,7 @@ stargazer(df_filtered, title = "Estadísticas Descriptivas",
                                                   "Mes", "Estrato1", "Sexo", "Edad", "Ingresos laborales Hora", "Ingresos laborales Mensual", 
                                                   "Ingreso total Mensual", "Ingreso total Hora", "College", "Depto", "Empleado", "Formal", "Educación máxima", 
                                                   "Parentesco Jefe Hogar", "Tiempo trabajando", "Seguridad Salud", "Tamaño Firma", "Total horas trabajadas",
-                                                  "Micro Empresa", "Pesos frecuencia", "Otros ingresos", "Pensiones"),
+                                                  "Micro Empresa", "Pesos frecuencia", "Otros ingresos", "Pensiones", "Número personas en Firma", "Ocupación"),
           out = "~/Documents/GitHub/BigData-MachineLearning202320/Taller 1/Views/Estad_desc.htm")
 
 skim(df_filtered)
@@ -288,38 +288,29 @@ boot.ci(result_boot, conf = 0.95, type = "basic")
 # Crear un gráfico de dispersión
 ggplot(df_filtered, aes(x = age, y = log_salario_hora)) +
   geom_point() +
-  labs(title = "Gráfico de Dispersión\nEdad al Cuadrado vs Ingreso por Hora",
+  labs(title = "Gráfico de Dispersión\nEdad vs Ingreso por Hora",
        x = "Edad al Cuadrado",
        y = "Ingreso por Hora") +
   geom_smooth(method = "lm", formula = y ~ x + I(x^2), se = TRUE) +
-  coord_cartesian(xlim = c(min(df_filtered$age), max(df_filtered$age))) +
+  coord_cartesian(xlim = c(18, 85)) +
   theme_bw()
 
 #iii) Bootstrap 
-
- boot.fn <- function (data , index)
-  + coef (
-    lm(log_salario_hora ~ age + I(age2),
-       data = data , subset = index)
-  )
+ boot.fn <- function(data , index)
+  + coef (lm(log_salario_hora ~ age + I(age2),
+       data = data , subset = index))
  set.seed (2)
  boot (df_filtered , boot.fn, 1000)
  
- summary (
-   lm(log_salario_hora ~ age + I(age2), data = df_filtered)
- )$coef
+ summary(lm(log_salario_hora ~ age + I(age2), data = df_filtered))$coef
 
  boot.fn <- function (data , index)
-   + confint.lm (
-     lm(log_salario_hora ~ age + I(age2),
-        data = data , subset = index)
-   )
+   + confint.lm(lm(log_salario_hora ~ age + I(age2),
+        data = data , subset = index))
  set.seed (1)
  boot (df_filtered , boot.fn, 1000)
 
- summary (
-   lm(log_salario_hora ~ age + I(age2), data = df_filtered)
- )$confint.lm
+ summary(lm(log_salario_hora ~ age + I(age2), data = df_filtered))$confint.lm
  
  
 df_filtered$pick_age <- (-(0.0160148406))/(2*(-0.0001502766))
@@ -339,17 +330,20 @@ df_filtered$pick_age <- (-(0.0160148406))/(2*(-0.0001502766))
 #### [5.]  Ejercicio: The gender earnings GAP ####  
 #================================================#
 ## Para hacer el FWL 4(b) El problema de mujer
+# La variable de sex toma valores de 1 para hombre y 0 para mujer
+df_filtered <- df_filtered %>% mutate(female = sex + 1) %>% 
+                                mutate(female = as.numeric(female)) # Ahora es 1 mujer y 2 hombre
+hist(df_filtered$female)
+df_filtered$female <- with(df_filtered, ifelse(female == 2, 0, 1)) # Ahora 1 es mujer y 0 es hombre
 
-## El punto a
 
- df_filtered$female <- 1 - df_filtered$sex
-
-regmujer<- lm(log_salario_hora ~ female, data=df_filtered)
+# La mujer gana menos que el hombre
+regmujer <- lm(log_salario_hora ~ female, data = df_filtered)
 summary(regmujer)
 
-reghombre<- lm(log_salario_hora ~ sex, data=df_filtered)
+reghombre <- lm(log_salario_hora ~ sex, data=df_filtered)
 summary(reghombre)
-## raro revisar con los demas datos (hombre gana menos que mujer)
+
 
 regmujer_controles<- lm(log_salario_hora ~ female + sizeFirm + p6870 + oficio + depto + college+ cotPension, data=df_filtered)
 summary(regmujer_controles)
@@ -488,6 +482,9 @@ boot (df_filtered2 , boot.fn, 1000)
 summary (
   lm(residuals1.2 ~ residuals1.1, data = df_filtered)
 )$coef
+
+
+
 
 #================================================#
 #### [6.]  Ejercicio:  Predicting earnings    ####  
