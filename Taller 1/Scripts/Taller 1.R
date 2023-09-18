@@ -80,17 +80,6 @@ glimpse(df_final)
 c("dsi", "age") %in% names(df_final)
 df_filtered <- subset(df_final, age >= 18 & dsi == 0)
 
-# Media de salarios
-mean(df_filtered$y_ingLab_m, na.rm = T)
-mean(df_filtered$y_salary_m, na.rm = T)
-mean(df_filtered$y_total_m, na.rm = T)
-
-# Estad Descriptivas con Stargazer
-stargazer(df_filtered, type = "text")
-
-# Crea la nueva variable "salario_nuevo" y reemplaza los valores faltantes con la media
-media_salario_hora <- mean(df_filtered$log_salario_hora, na.rm = TRUE)
-df_filtered$log_salario_completo_hora <- ifelse(is.na(df_filtered$log_salario_hora), media_salario_hora, df_filtered$log_salario_hora)
 
 # Variables de salario disponibles:
 # ingtot -> ingreso total
@@ -101,6 +90,36 @@ df_filtered$log_salario_completo_hora <- ifelse(is.na(df_filtered$log_salario_ho
 # y_salary_m -> Salary - Nominal Monthly
 # y_total_m -> Income Salaried + indep total + nominal monthly
 # y_total_m_ha -> Income Salaried + indep total + nominal hourly
+
+# Media de salarios
+mean(df_filtered$y_ingLab_m, na.rm = T)
+mean(df_filtered$y_salary_m, na.rm = T)
+mean(df_filtered$y_total_m, na.rm = T)
+mean(df_filtered$y_ingLab_m_ha, na.rm = T)
+sum(is.na(df_filtered$y_ingLab_m_ha))
+
+
+# Variables de interés disponibles:
+names(df_filtered)
+df_filtered <- df_filtered %>% select(c("directorio", "secuencia_p", "orden", "clase", "dominio", 
+                                        "mes", "estrato1", "sex", "age", "y_ingLab_m_ha", "y_ingLab_m", "y_total_m", 
+                                        "y_total_m_ha", "college", "college", "depto", "dsi", "formal", "maxEducLevel", 
+                                        "p6050", "p6426", "regSalud", "sizeFirm", "totalHoursWorked",
+                                        "microEmpresa", "fweight", "p6620", "cotPension") )  
+
+# Estad Descriptivas con Stargazer
+stargazer(df_filtered, title = "Estadísticas Descriptivas",
+          type = "text", digits = 2)
+
+
+## creo variables logaritmicas
+df_filtered$log_salario_mensual <- log(df_filtered$y_ingLab_m)
+df_filtered$log_salario_hora <- log(df_filtered$y_ingLab_m_ha)
+
+# Crea la nueva variable "salario_nuevo" y reemplaza los valores faltantes con la media
+media_salario_hora <- mean(df_filtered$log_salario_hora, na.rm = TRUE)
+df_filtered$log_salario_completo_hora <- ifelse(is.na(df_filtered$log_salario_hora), media_salario_hora, df_filtered$log_salario_hora)
+
 
 
 ## Histograma de referencia - Con Comando de geom_histogram :)
@@ -141,16 +160,10 @@ boxplot(df_filtered$y_ingLab_m,
 
 
 # Crear una nueva variable de ingreso limitada a 1000 o menos ( se trunca en )
-df_filtered$ingreso_limitado2 <- ifelse(df_filtered$y_ingLab_m <=12000 , 
-                                        df_filtered$y_ingLab_m, 12000)
+df_filtered$ingreso_limitado2 <- ifelse(df_filtered$y_ingLab_m <=12000 , df_filtered$y_ingLab_m, 12000)
 
 ## Algo quedo mal, use arbitrariamente el 12000
-df_filtered$ingreso_limitado2 <- ifelse(df_filtered$y_ingLab_m <=12000 , 
-                                        df_filtered$y_ingLab_m, 12000)
-
-## creo variables logaritmicas
-df_filtered$log_salario_mensual <- log(df_filtered$y_ingLab_m)
-df_filtered$log_salario_hora <- log(df_filtered$y_ingLab_m_ha)
+df_filtered$ingreso_limitado2 <- ifelse(df_filtered$y_ingLab_m <=12000 , df_filtered$y_ingLab_m, 12000)
 
 
 
@@ -164,6 +177,13 @@ boxplot(df_filtered$log_salario_mensual,
 
 # Create a histogram of the salary distribution
 hist(df_filtered$log_salario_mensual,
+     main = " Monthly Salary Distribution",
+     xlab = "Salary in logs",
+     ylab = "Frequency",
+     col = "lightblue",
+     border = "black")
+
+hist(df_filtered$log_salario_completo_hora,
      main = " Monthly Salary Distribution",
      xlab = "Salary in logs",
      ylab = "Frequency",
@@ -185,7 +205,6 @@ summary(df_filtered$p6426)
 ## variable microempresa tambien me parece interesante
 
 
-
 # Create a boxplot of income vs. college attendance
 boxplot(log_salario_mensual ~ college, data = df_filtered,
         main = "Income vs. College Attendance",
@@ -197,7 +216,6 @@ boxplot(log_salario_mensual ~ college, data = df_filtered,
 
 
 # Create a boxplot of income vs. Sex
-
 boxplot(log_salario_mensual ~ sex, data = df_filtered,
         main = "Income vs. sex",
         xlab = "sexo (1=hombre, 0=mujer",
@@ -206,7 +224,6 @@ boxplot(log_salario_mensual ~ sex, data = df_filtered,
 
 ## las dimensiones no son las mejores. ( curioso como se comporta el 1 que es
 ## educacion teriaria tiene menos varianza, pero se comporta en la media similarmente)
-
 ## si les gusta se puede hacer asi respecto a informal y tambien respecto a clase
 
 
@@ -222,20 +239,13 @@ pie(counts, labels = c("Doesn't Work in Small Company", "Works in Small Company"
     main = "Pie Chart of Employment in Small Companies",
     col = c("lightblue", "lightgreen"))
 
-##
-# Cargar librería si no está cargada
-# install.packages("ggplot2")
-library(ggplot2)
 
 # Crear un gráfico de puntos con colores para la variable categórica
-
 ggplot(df_filtered, aes(x = p6210, y =log_salario_mensual , color = educacion_anios)) +
   geom_point() +
   labs(title = "Gráfico de Puntos de Ingresos por Años de Educación",
        x = "Años de Educación",
-       y = "Ingreso"
-  )
-
+       y = "Ingreso")
 
 ggplot(data=df_filtered, aes(x= p6210, y= log_salario_mensual ))+
   labs(x="edad", y="ingresos mensuales")
@@ -244,8 +254,11 @@ ggplot(data=df_filtered, aes(x= p6210, y= log_salario_mensual ))+
 #===========================================#
 #### [4.]  Ejercicio: Age-wage profile ####  
 #===========================================#
-## El ejercicio de regresion 
+# Páginas de ayuda para graficar intervalos de confianza a partir de bootstrap
+# https://www.geeksforgeeks.org/bootstrap-confidence-interval-with-r-programming/
+# https://www.geeksforgeeks.org/how-to-plot-a-confidence-interval-in-r/
 
+## El ejercicio de regresion 
 df_filtered$age2 <- df_filtered$age^2
 summary(df_filtered$age2)
 summary(df_filtered$age)
