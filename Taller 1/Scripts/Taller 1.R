@@ -22,7 +22,7 @@ rm(list=ls())
 install.packages("pacman")
 library(pacman)
 
-p_load(rvest, tidyverse, skimr, jsonlite, stargazer, hrbrthemes)
+p_load(rvest, tidyverse, skimr, jsonlite, stargazer, hrbrthemes, boot)
 
 getwd()
 setwd("~/Documents/GitHub/BigData-MachineLearning202320")
@@ -103,7 +103,7 @@ sum(is.na(df_filtered$y_ingLab_m_ha))
 names(df_filtered)
 df_filtered <- df_filtered %>% select(c("directorio", "secuencia_p", "orden", "clase", "dominio", 
                                         "mes", "estrato1", "sex", "age", "y_ingLab_m_ha", "y_ingLab_m", "y_total_m", 
-                                        "y_total_m_ha", "college", "college", "depto", "dsi", "formal", "maxEducLevel", 
+                                        "y_total_m_ha", "college", "depto", "dsi", "formal", "maxEducLevel", 
                                         "p6050", "p6426", "regSalud", "sizeFirm", "totalHoursWorked",
                                         "microEmpresa", "fweight", "p6620", "cotPension") )  
 
@@ -114,7 +114,15 @@ df_filtered <- df_filtered %>% select(c("directorio", "secuencia_p", "orden", "c
 stargazer(df_filtered, title = "Estadísticas Descriptivas",
           type = "text", digits = 2)
 
+stargazer(df_filtered, title = "Estadísticas Descriptivas",
+          type = "html", digits = 2, covariate.labels = c("Directorio", "Secuencia-p", "Orden", "Clase", "Dominio", 
+                                                  "Mes", "Estrato1", "Sexo", "Edad", "Ingresos laborales Hora", "Ingresos laborales Mensual", 
+                                                  "Ingreso total Mensual", "Ingreso total Hora", "College", "Depto", "Empleado", "Formal", "Educación máxima", 
+                                                  "Parentesco Jefe Hogar", "Tiempo trabajando", "Seguridad Salud", "Tamaño Firma", "Total horas trabajadas",
+                                                  "Micro Empresa", "Pesos frecuencia", "Otros ingresos", "Pensiones"),
+          out = "~/Documents/GitHub/BigData-MachineLearning202320/Taller 1/Views/Estad_desc.htm")
 
+skim(df_filtered)
 ## creo variables logaritmicas
 df_filtered$log_salario_mensual <- log(df_filtered$y_ingLab_m)
 df_filtered$log_salario_hora <- log(df_filtered$y_ingLab_m_ha)
@@ -122,21 +130,31 @@ df_filtered$log_salario_hora <- log(df_filtered$y_ingLab_m_ha)
 # Crea la nueva variable "salario_nuevo" y reemplaza los valores faltantes con la media
 media_salario_hora <- mean(df_filtered$log_salario_hora, na.rm = TRUE)
 df_filtered$log_salario_completo_hora <- ifelse(is.na(df_filtered$log_salario_hora), media_salario_hora, df_filtered$log_salario_hora)
-
+skim(df_filtered)
 
 
 ## Histograma de referencia - Con Comando de geom_histogram :)
 # Referencia: https://r-graph-gallery.com/220-basic-ggplot2-histogram.html
-ggplot(data=df_filtered, aes(x= y_total_m))+
+ggplot(data=df_filtered, aes(x= y_ingLab_m))+
   geom_histogram(bins = 25, fill="#69b3a2", color="#e9ecef") +
   theme_ipsum() +
-  labs(x="Ingresos Mensuales") +
-  ggtitle("Histograma de ingresos mensuales")
+  labs(x="Ingresos Mensuales", y="Conteo") +
+  ggtitle("Histograma de ingresos laborales mensuales") +
+  theme(plot.title = element_text(size = 14))
 
+ggplot(data=df_filtered, aes(x= y_ingLab_m_ha))+
+  geom_histogram(bins = 25, fill="#69b3a2", color="#e9ecef") +
+  theme_ipsum() +
+  labs(x="Ingresos por hora", y="Conteo") +
+  ggtitle("Histograma de ingresos laborales por hora") +
+  theme(plot.title = element_text(size = 14))
 
-skim(df_filtered)
-skim(df)
-skim(db$age)
+ggplot(data=df_filtered, aes(x= log_salario_completo_hora))+
+  geom_histogram(bins = 25, fill="#69b3a2", color="#e9ecef") +
+  theme_ipsum() +
+  labs(x="Ingresos por hora (logaritmo)", y="Conteo") +
+  ggtitle("Histograma de logaritmo ingresos laborales por hora") +
+  theme(plot.title = element_text(size = 14))
 
 
 ## Salario mensual y por hora
@@ -163,13 +181,9 @@ boxplot(df_filtered$y_ingLab_m,
 
 
 # Crear una nueva variable de ingreso limitada a 1000 o menos ( se trunca en )
-df_filtered$ingreso_limitado2 <- ifelse(df_filtered$y_ingLab_m <=12000 , df_filtered$y_ingLab_m, 12000)
-
+# df_filtered$ingreso_limitado2 <- ifelse(df_filtered$y_ingLab_m <=12000 , df_filtered$y_ingLab_m, 12000)
 ## Algo quedo mal, use arbitrariamente el 12000
-df_filtered$ingreso_limitado2 <- ifelse(df_filtered$y_ingLab_m <=12000 , df_filtered$y_ingLab_m, 12000)
-
-
-
+# df_filtered$ingreso_limitado2 <- ifelse(df_filtered$y_ingLab_m <=12000 , df_filtered$y_ingLab_m, 12000)
 
 boxplot(df_filtered$log_salario_mensual,
         main = "Income Distribution",
@@ -195,13 +209,8 @@ hist(df_filtered$log_salario_completo_hora,
 ## se observa mejor la distribucion de salario
 
 
-summary(df_filtered$p6426)
-## cuanto lleva trabajando en esa empresa, me parece importante
-## variable microempresa tambien me parece interesante
-
-
 # Create a boxplot of income vs. college attendance
-boxplot(log_salario_mensual ~ college, data = df_filtered,
+boxplot(log_salario_completo_hora ~ college, data = df_filtered,
         main = "Income vs. College Attendance",
         xlab = "College Attendance",
         ylab = "Income",
@@ -211,7 +220,7 @@ boxplot(log_salario_mensual ~ college, data = df_filtered,
 
 
 # Create a boxplot of income vs. Sex
-boxplot(log_salario_mensual ~ sex, data = df_filtered,
+boxplot(log_salario_completo_hora ~ sex, data = df_filtered,
         main = "Income vs. sex",
         xlab = "sexo (1=hombre, 0=mujer",
         ylab = "Income",
@@ -222,28 +231,23 @@ boxplot(log_salario_mensual ~ sex, data = df_filtered,
 ## si les gusta se puede hacer asi respecto a informal y tambien respecto a clase
 
 
-
 # Create a vector representing the counts (0s and 1s)
 counts <- table(df_filtered$microEmpresa)
 
 # Create a pie chart
 ## libreria scales para que salga porcentaje en la grafica de torta
 library(scales)
-
 pie(counts, labels = c("Doesn't Work in Small Company", "Works in Small Company"),
     main = "Pie Chart of Employment in Small Companies",
     col = c("lightblue", "lightgreen"))
 
 
 # Crear un gráfico de puntos con colores para la variable categórica
-ggplot(df_filtered, aes(x = p6210, y =log_salario_mensual , color = educacion_anios)) +
+ggplot(df_filtered, aes(x = p6210, y =log_salario_mensual)) +
   geom_point() +
   labs(title = "Gráfico de Puntos de Ingresos por Años de Educación",
        x = "Años de Educación",
        y = "Ingreso")
-
-ggplot(data=df_filtered, aes(x= p6210, y= log_salario_mensual ))+
-  labs(x="edad", y="ingresos mensuales")
 
 
 #===========================================#
@@ -253,33 +257,39 @@ ggplot(data=df_filtered, aes(x= p6210, y= log_salario_mensual ))+
 # https://www.geeksforgeeks.org/bootstrap-confidence-interval-with-r-programming/
 # https://www.geeksforgeeks.org/how-to-plot-a-confidence-interval-in-r/
 
-## El ejercicio de regresion 
+# Creación de variable de edad al cuadrado
 df_filtered$age2 <- df_filtered$age^2
 summary(df_filtered$age2)
 summary(df_filtered$age)
 
+# El ejercicio de regresion 
 model1 <- lm(log_salario_hora ~ age + age2 , data=df_filtered)
-summary (model1)
-stargazer(reg,type="text")
+summary(model1)
+stargazer(model1,type="text")
+stargazer(model1,type="html", covariate.labels = c("Edad", "Edad Cuadrada"), dep.var.labels = "Logaritmo de salario por hora",
+          out = "~/Documents/GitHub/BigData-MachineLearning202320/Taller 1/Views/reg_age_wage.htm")
+
+?boot.ci
+boot.W <- function(data, index){
+  coef(lm(log_salario_hora ~ age + age2 , data= data, subset = index))
+}
+set.seed(123456)
+result_boot <- boot(df_filtered, boot.W, 1000)
 
 ## todas dan muy significativas, efectivamente el cuadrado es negativo y corrobora
 ## que la relacion es concava. Se cumple lo que la teoria menciona del descenso de ingreso
 ## a partir de edades altas (50 años)
 ## se interpreta log-lin ( un cambio B*100 es un cambio de y%)
-
 ## le podemos añadir edad al cubo a ver si es mas pronunciada la relacion de disminucion
 ## de ingreso en la vejez
 
-
-library(ggplot2)
 # Crear un gráfico de dispersión
 ggplot(df_filtered, aes(x = age2, y = log_salario_hora)) +
   geom_point() +
   labs(
     title = "Gráfico de Dispersión\nEdad al Cuadrado vs Ingreso hora",
     x = "Edad al Cuadrado",
-    y = "Ingreso"
-  )
+    y = "Ingreso")
 
 ## en este scatter la relacion no es tan clara
 ## se remueven 1286 por missing value (warning)
