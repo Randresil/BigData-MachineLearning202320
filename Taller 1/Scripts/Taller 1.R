@@ -398,6 +398,19 @@ stargazer(regmujer, pic3, type = "text", column.labels = c("Modelo Incondicional
           out = "~/Documents/GitHub/BigData-MachineLearning202320/Taller 1/Views/reg_female.htm")
 
 
+ggplot(data = df_filtered, aes(x = age, y = log_salario_hora, color = female)) +
+  geom_point() +
+  facet_wrap(~ female) +
+  theme(legend.position = "none", plot.title = element_text(size = 12) ) +
+  geom_smooth(color = "red",  method = "lm", formula = y ~ x + I(x^2), se = TRUE) +
+  labs(x = "Edad", y = "Log Salario por Hora", caption = "0 homber y 1 mujer",
+       title = "Edad vs Logaritmo del Salario por sexo")
+ggsave("~/Documents/GitHub/BigData-MachineLearning202320/Taller 1/Views/Edad_LogSalario_Sexo.png")
+
+
+log_w_age_female <- lm(log_salario_hora ~ age*female + I(age^2)*female, data = df_filtered)
+stargazer(log_w_age_female, type = "text")
+
 
 ## ------- BOOTSRAP DE LA REGRESION(COEFICIENTE DE FEMALE)-------##
 mod1<- lm(log_salario_completo_hora ~ female +sizeFirm + p6870 + oficio + depto + college+ cotPension, df_filtered)
