@@ -273,6 +273,35 @@ ggplot(df_filtered, aes(x = age2, y = log_salario_hora)) +
     y = "Ingreso"
   )
 
+#iii) Bootstrap 
+
+ boot.fn <- function (data , index)
+  + coef (
+    lm(log_salario_hora ~ age + I(age2),
+       data = data , subset = index)
+  )
+ set.seed (2)
+ boot (df_filtered , boot.fn, 1000)
+ 
+ summary (
+   lm(log_salario_hora ~ age + I(age2), data = df_filtered)
+ )$coef
+
+ boot.fn <- function (data , index)
+   + confint.lm (
+     lm(log_salario_hora ~ age + I(age2),
+        data = data , subset = index)
+   )
+ set.seed (1)
+ boot (df_filtered , boot.fn, 1000)
+
+ summary (
+   lm(log_salario_hora ~ age + I(age2), data = df_filtered)
+ )$confint.lm
+ 
+ 
+df_filtered$pick_age <- (-(0.0160148406))/(2*(-0.0001502766))
+ 
 ## en este scatter la relacion no es tan clara
 ## se remueven 1286 por missing value (warning)
 
@@ -375,6 +404,66 @@ sqrt(var(eta_mod1))
 
 print(coefs)
 
+##Segundo intento de boot##------------------------------------
+#i) Encontrar residuales 1
+boot.fn <- function (data , index)
+  + resid (
+    lm(female ~ sizeFirm + p6870 + oficio + college + cotPension ,
+       data = data , subset = index)
+
+  )
+set.seed (1)
+boot (df_filtered2 , boot.fn, 1000)
+
+summary (
+  lm(female ~ sizeFirm + p6870 + oficio + college + cotPension, data = df_filtered)
+)$resid
+
+residuals1.1 <- (
+  lm(female ~ sizeFirm + p6870 + oficio + college + cotPension, data = df_filtered)
+)$resid
+
+#)ii Encontrar residuales 2 
+
+boot.fn <- function (data , index)
+  + resid (
+    lm(log_salario_hora ~ sizeFirm + p6870 + oficio + college + cotPension ,
+       data = data , subset = index)
+    
+  )
+set.seed (1)
+boot (df_filtered2 , boot.fn, 1000)
+
+summary (
+  lm(log_salario_hora ~ sizeFirm + p6870 + oficio + college + cotPension, data = df_filtered)
+)$resid
+
+residuals1.2 <- (
+  lm(log_salario_hora ~ sizeFirm + p6870 + oficio + college + cotPension, data = df_filtered)
+)$resid
+
+#)iii Bootstrap con residuales 
+
+boot.fn <- function (data , index)
+  + resid (
+    lm(log_salario_hora ~ sizeFirm + p6870 + oficio + college + cotPension ,
+       data = data , subset = index)
+    
+  )
+
+boot.fn <- function (data , index)
+  + coef (
+    lm(residuals1.2 ~ residuals1.1  ,
+       data = data , subset = index)
+    
+  )
+
+set.seed (1)
+boot (df_filtered2 , boot.fn, 1000)
+
+summary (
+  lm(residuals1.2 ~ residuals1.1, data = df_filtered)
+)$coef
 
 
 ##-------------------- SI SITRVE ( SAMPLE AND TRAIN)-----
@@ -415,7 +504,7 @@ model6 <- lm(log_salario_hora ~ poly(age, 8, raw = TRUE) + poly(maxEducLevel, 3,
 
 df_filtered$resta_edad <- ifelse(df_filtered$age > 65, df_filtered$age - 65, 0)
 
-df_filtered$experiencia_ajustada2 <- ifelse(df_filtered$age > 65, df_filtered$age - df_filtered$resta_edad - df_filtered$maxEducLevel, df_filtered$age - df_filtered$maxEducLevel)
+df_filtered$experiencia_ajustada <- ifelse(df_filtered$age > 65, df_filtered$age - df_filtered$resta_edad - df_filtered$maxEducLevel, df_filtered$age - df_filtered$maxEducLevel)
 
 
 
@@ -537,6 +626,22 @@ db
 ## se esocge el modelo 21 (5) tiene el MSE MAS BAJO. (0,31447)
 ## el segundo modelo con el MSE mas bajo es el 20  (0,3192)
 
+##parte d) LOOCV
 
+library(boot)
 
+ glm.fit <- glm (mpg ~ horsepower , data = Auto)
+ cv.err <- cv.glm (Auto, glm.fit)
+ cv.err$delta
+
+ looc.fit <- glm(log_salario_hora ~ poly(age, 3, raw = TRUE):
+                 poly(maxEducLevel, 2, raw = TRUE) + 
+                 poly(experiencia_ajustada,3,raw=TRUE) +
+                 sizeFirm + 
+                 regSalud, 
+               data = df_filtered)
+ 
+ looc.err <- cv.glm(df_filtered, looc.fit)
+ looc.err$delta
+ 
 
