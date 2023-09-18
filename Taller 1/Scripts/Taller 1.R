@@ -313,6 +313,28 @@ reg_mujer_controles2 <- lm (residuals2 ~ residuals1 )
 
 stargazer(reg1,reg2,type="text",digits=7) 
 
+## ------ i)FWL----------------------------------------------##
+##intento con la media 
+
+df_filtered2 <- data.frame(df_filtered)
+
+media_variable <- mean(df_filtered2$log_salario_hora, na.rm = TRUE)
+df_filtered2$log_salario_hora[is.na(df_filtered2$log_salario_hora)] <- media_variable
+
+
+pic1<- lm(female ~ sizeFirm + p6870 + oficio + college + cotPension ,df_filtered2 )
+residuals1 <- residuals(pic1)
+pic2<- lm(log_salario_hora ~ sizeFirm + p6870 + oficio+ college + cotPension, df_filtered2)
+residuals2 <- residuals(pic2)
+pic3<- lm(log_salario_hora ~ female + sizeFirm + p6870 + oficio+ college+ cotPension, df_filtered2)
+
+length(pic1)
+length(pic2)
+
+reg_mujer_controles2 <- lm (residuals2 ~ residuals1 )
+
+stargazer(reg_mujer_controles2, type="text", digits=7)
+stargazer(pic3, type="text", digits=7)
 
 ## ------- BOOTSRAP DE LA REGRESION(COEFICIENTE DE FEMALE)-------##
 mod1<- lm(log_salario_completo_hora ~ female +sizeFirm + p6870 + oficio + depto + college+ cotPension, df_filtered)
@@ -516,5 +538,5 @@ db
 ## el segundo modelo con el MSE mas bajo es el 20  (0,3192)
 
 
-#esr¿te es 
+
 
