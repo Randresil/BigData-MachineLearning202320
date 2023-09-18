@@ -242,14 +242,6 @@ pie(counts, labels = c("Doesn't Work in Small Company", "Works in Small Company"
     col = c("lightblue", "lightgreen"))
 
 
-# Crear un gráfico de puntos con colores para la variable categórica
-ggplot(df_filtered, aes(x = p6210, y =log_salario_mensual)) +
-  geom_point() +
-  labs(title = "Gráfico de Puntos de Ingresos por Años de Educación",
-       x = "Años de Educación",
-       y = "Ingreso")
-
-
 #===========================================#
 #### [4.]  Ejercicio: Age-wage profile ####  
 #===========================================#
@@ -265,16 +257,23 @@ summary(df_filtered$age)
 # El ejercicio de regresion 
 model1 <- lm(log_salario_hora ~ age + age2 , data=df_filtered)
 summary(model1)
-stargazer(model1,type="text")
+stargazer(model1,type="text", digits = 2)
 stargazer(model1,type="html", covariate.labels = c("Edad", "Edad Cuadrada"), dep.var.labels = "Logaritmo de salario por hora",
-          out = "~/Documents/GitHub/BigData-MachineLearning202320/Taller 1/Views/reg_age_wage.htm")
+          digits = 2, out = "~/Documents/GitHub/BigData-MachineLearning202320/Taller 1/Views/reg_age_wage.htm")
 
+# Creación del bootstrap
 ?boot.ci
 boot.W <- function(data, index){
   coef(lm(log_salario_hora ~ age + age2 , data= data, subset = index))
 }
+
+# Fijación de semilla para reproducir resultados
 set.seed(123456)
 result_boot <- boot(df_filtered, boot.W, 1000)
+ci <- boot.ci(result_boot, conf = 0.95, type = "basic")
+
+# Tenemos intervalos para B0, AGE, AGE2 iguales a: 0.0684885709, 0.0039112949, 0.0000508653
+# df_filtered <- df_filtered %>% mutate(reg_values = model1$fitted.values, lowAW = )
 
 ## todas dan muy significativas, efectivamente el cuadrado es negativo y corrobora
 ## que la relacion es concava. Se cumple lo que la teoria menciona del descenso de ingreso
@@ -287,9 +286,11 @@ result_boot <- boot(df_filtered, boot.W, 1000)
 ggplot(df_filtered, aes(x = age2, y = log_salario_hora)) +
   geom_point() +
   labs(
-    title = "Gráfico de Dispersión\nEdad al Cuadrado vs Ingreso hora",
+    title = "Gráfico de Dispersión\nEdad al Cuadrado vs Ingreso por Hora",
     x = "Edad al Cuadrado",
-    y = "Ingreso")
+    y = "Ingreso por Hora") +
+  geom_smooth(method = lm, data = df_filtered, 
+              formula = log_salario_hora ~ age + age2, na.rm = T)
 
 ## en este scatter la relacion no es tan clara
 ## se remueven 1286 por missing value (warning)
@@ -298,11 +299,13 @@ ggplot(df_filtered, aes(x = age2, y = log_salario_hora)) +
 ## Tengo problema con el boostrap para hallar maximo
 
 ## creo que al derivar la solucion se encuentra en:
-##  ------- Edad_maxima<-b1+2*b2*age2 --------
+##  === Edad_maxima<-b1+2*b2*age2 ===
 
 
 
-
+#================================================#
+#### [5.]  Ejercicio: The gender earnings GAP ####  
+#================================================#
 ## Para hacer el FWL 4(b) El problema de mujer
 
 ## El punto a
