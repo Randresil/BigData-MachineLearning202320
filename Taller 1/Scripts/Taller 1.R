@@ -168,12 +168,16 @@ summary(df_filtered$y_ingLab_m)
 
 # Create a boxplot to visualize the distribution and quartiles of income
 ## No se ve bien porque hay mucha varianza.
+setwd("~/Documents/GitHub/BigData-MachineLearning202320/Taller 1/Views")
+
 boxplot(df_filtered$y_ingLab_m_ha,
         main = "Income Distribution",
         ylab = "Income",
         col = "lightblue",
         border = "red",
         horizontal = TRUE)
+png("Boxplot_inglabhour.png")
+dev.off()
 
 
 boxplot(df_filtered$y_ingLab_m,
@@ -182,6 +186,8 @@ boxplot(df_filtered$y_ingLab_m,
         col = "lightblue",
         border = "red",
         horizontal = TRUE)
+png("Boxplot_inglabmonth.png")
+dev.off()
 
 # Crear una nueva variable de ingreso limitada a 1000 o menos ( se trunca en )
 # df_filtered$ingreso_limitado2 <- ifelse(df_filtered$y_ingLab_m <=12000 , df_filtered$y_ingLab_m, 12000)
@@ -194,6 +200,8 @@ boxplot(df_filtered$log_salario_mensual,
         col = "lightblue",
         border = "red",
         horizontal = TRUE)
+png("Boxplot_log_salario_mensual.png")
+dev.off()
 
 # Create a histogram of the salary distribution
 hist(df_filtered$log_salario_mensual,
@@ -202,6 +210,8 @@ hist(df_filtered$log_salario_mensual,
      ylab = "Frequency",
      col = "lightblue",
      border = "black")
+png("Hist_log_salario_mensual.png")
+dev.off()
 
 hist(df_filtered$log_salario_completo_hora,
      main = " Monthly Salary Distribution",
@@ -209,7 +219,8 @@ hist(df_filtered$log_salario_completo_hora,
      ylab = "Frequency",
      col = "lightblue",
      border = "black")
-
+png("Hist_log_salario_hora.png")
+dev.off()
 ## se observa mejor la distribucion de salario
 
 
@@ -219,6 +230,8 @@ boxplot(log_salario_completo_hora ~ college, data = df_filtered,
         xlab = "College Attendance",
         ylab = "Income",
         col = c("lightblue", "lightgreen"))
+png("Boxplot_log_salario_hora_college.png")
+dev.off()
 
 ## las dimensiones no son las mejores. ( curioso como se comporta el 1 que es
 ## educacion teriaria tiene menos varianza, pero se comporta en la media similarmente)
@@ -230,6 +243,8 @@ boxplot(log_salario_completo_hora ~ sex, data = df_filtered,
         xlab = "sexo (1=hombre, 0=mujer",
         ylab = "Income",
         col = c("lightblue", "lightgreen"))
+png("Boxplot_log_salario_sexo.png")
+dev.off()
 
 ## las dimensiones no son las mejores. ( curioso como se comporta el 1 que es
 ## educacion teriaria tiene menos varianza, pero se comporta en la media similarmente)
@@ -238,7 +253,6 @@ boxplot(log_salario_completo_hora ~ sex, data = df_filtered,
 
 # Create a vector representing the counts (0s and 1s)
 counts <- table(df_filtered$microEmpresa)
-
 # Create a pie chart
 ## libreria scales para que salga porcentaje en la grafica de torta
 library(scales)
