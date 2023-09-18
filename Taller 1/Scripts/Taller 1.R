@@ -174,7 +174,7 @@ boxplot(df_filtered$y_ingLab_m_ha,
         col = "lightblue",
         border = "red",
         horizontal = TRUE)
-png("~/Documents/GitHub/BigData-MachineLearning202320/Taller 1/Views/Boxplot_inglabhour.png")
+
 
 boxplot(df_filtered$y_ingLab_m,
         main = "Income Distribution",
@@ -182,8 +182,6 @@ boxplot(df_filtered$y_ingLab_m,
         col = "lightblue",
         border = "red",
         horizontal = TRUE)
-png(file="~/Documents/GitHub/BigData-MachineLearning202320/Taller 1/Views/Boxplot_inglabmonth.png")
-
 
 # Crear una nueva variable de ingreso limitada a 1000 o menos ( se trunca en )
 # df_filtered$ingreso_limitado2 <- ifelse(df_filtered$y_ingLab_m <=12000 , df_filtered$y_ingLab_m, 12000)
@@ -196,8 +194,6 @@ boxplot(df_filtered$log_salario_mensual,
         col = "lightblue",
         border = "red",
         horizontal = TRUE)
-png(file="~/Documents/GitHub/BigData-MachineLearning202320/Taller 1/Views/Boxplot_log_ingmonth.png")
-
 
 # Create a histogram of the salary distribution
 hist(df_filtered$log_salario_mensual,
@@ -206,8 +202,6 @@ hist(df_filtered$log_salario_mensual,
      ylab = "Frequency",
      col = "lightblue",
      border = "black")
-png(file="~/Documents/GitHub/BigData-MachineLearning202320/Taller 1/Views/Hist_log_inglabmonth.png")
-
 
 hist(df_filtered$log_salario_completo_hora,
      main = " Monthly Salary Distribution",
@@ -215,7 +209,6 @@ hist(df_filtered$log_salario_completo_hora,
      ylab = "Frequency",
      col = "lightblue",
      border = "black")
-png(file="~/Documents/GitHub/BigData-MachineLearning202320/Taller 1/Views/Boxplot_log_inglabhour.png")
 
 ## se observa mejor la distribucion de salario
 
@@ -226,7 +219,6 @@ boxplot(log_salario_completo_hora ~ college, data = df_filtered,
         xlab = "College Attendance",
         ylab = "Income",
         col = c("lightblue", "lightgreen"))
-png(file="~/Documents/GitHub/BigData-MachineLearning202320/Taller 1/Views/Boxplot_log_inghour-college.png")
 
 ## las dimensiones no son las mejores. ( curioso como se comporta el 1 que es
 ## educacion teriaria tiene menos varianza, pero se comporta en la media similarmente)
