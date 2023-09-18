@@ -516,5 +516,5 @@ db
 ## el segundo modelo con el MSE mas bajo es el 20  (0,3192)
 
 
-
+#esr¿te es 
 
