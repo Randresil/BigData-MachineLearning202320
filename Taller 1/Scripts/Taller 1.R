@@ -313,6 +313,7 @@ ggplot(df_filtered, aes(x = age, y = log_salario_hora)) +
   geom_smooth(method = "lm", formula = y ~ x + I(x^2), se = TRUE) +
   coord_cartesian(xlim = c(18, 85)) +
   theme_bw()
+ggsave("Graph_disp_Edad-Ingreso.png")
 
 #iii) Bootstrap 
  boot.fn <- function(data , index)
