@@ -141,6 +141,7 @@ ggplot(data=df_filtered, aes(x= y_ingLab_m))+
   labs(x="Ingresos Mensuales", y="Conteo") +
   ggtitle("Histograma de ingresos laborales mensuales") +
   theme(plot.title = element_text(size = 14))
+ggsave("~/Documents/GitHub/BigData-MachineLearning202320/Taller 1/Views/Hist_ingmonth.png")
 
 ggplot(data=df_filtered, aes(x= y_ingLab_m_ha))+
   geom_histogram(bins = 25, fill="#69b3a2", color="#e9ecef") +
@@ -148,6 +149,7 @@ ggplot(data=df_filtered, aes(x= y_ingLab_m_ha))+
   labs(x="Ingresos por hora", y="Conteo") +
   ggtitle("Histograma de ingresos laborales por hora") +
   theme(plot.title = element_text(size = 14))
+ggsave("~/Documents/GitHub/BigData-MachineLearning202320/Taller 1/Views/Hist_inghourly.png")
 
 ggplot(data=df_filtered, aes(x= log_salario_completo_hora))+
   geom_histogram(bins = 25, fill="#69b3a2", color="#e9ecef") +
@@ -155,6 +157,7 @@ ggplot(data=df_filtered, aes(x= log_salario_completo_hora))+
   labs(x="Ingresos por hora (logaritmo)", y="Conteo") +
   ggtitle("Histograma de logaritmo ingresos laborales por hora") +
   theme(plot.title = element_text(size = 14))
+  ggsave("~/Documents/GitHub/BigData-MachineLearning202320/Taller 1/Views/Hist_log_inghourly.png")
 
 
 ## Salario mensual y por hora
@@ -171,6 +174,7 @@ boxplot(df_filtered$y_ingLab_m_ha,
         col = "lightblue",
         border = "red",
         horizontal = TRUE)
+png("~/Documents/GitHub/BigData-MachineLearning202320/Taller 1/Views/Boxplot_inglabhour.png")
 
 boxplot(df_filtered$y_ingLab_m,
         main = "Income Distribution",
@@ -178,6 +182,7 @@ boxplot(df_filtered$y_ingLab_m,
         col = "lightblue",
         border = "red",
         horizontal = TRUE)
+png(file="~/Documents/GitHub/BigData-MachineLearning202320/Taller 1/Views/Boxplot_inglabmonth.png")
 
 
 # Crear una nueva variable de ingreso limitada a 1000 o menos ( se trunca en )
@@ -191,6 +196,8 @@ boxplot(df_filtered$log_salario_mensual,
         col = "lightblue",
         border = "red",
         horizontal = TRUE)
+png(file="~/Documents/GitHub/BigData-MachineLearning202320/Taller 1/Views/Boxplot_log_ingmonth.png")
+
 
 # Create a histogram of the salary distribution
 hist(df_filtered$log_salario_mensual,
@@ -199,6 +206,8 @@ hist(df_filtered$log_salario_mensual,
      ylab = "Frequency",
      col = "lightblue",
      border = "black")
+png(file="~/Documents/GitHub/BigData-MachineLearning202320/Taller 1/Views/Hist_log_inglabmonth.png")
+
 
 hist(df_filtered$log_salario_completo_hora,
      main = " Monthly Salary Distribution",
@@ -206,6 +215,8 @@ hist(df_filtered$log_salario_completo_hora,
      ylab = "Frequency",
      col = "lightblue",
      border = "black")
+png(file="~/Documents/GitHub/BigData-MachineLearning202320/Taller 1/Views/Boxplot_log_inglabhour.png")
+
 ## se observa mejor la distribucion de salario
 
 
@@ -215,6 +226,8 @@ boxplot(log_salario_completo_hora ~ college, data = df_filtered,
         xlab = "College Attendance",
         ylab = "Income",
         col = c("lightblue", "lightgreen"))
+png(file="~/Documents/GitHub/BigData-MachineLearning202320/Taller 1/Views/Boxplot_log_inghour-college.png")
+
 ## las dimensiones no son las mejores. ( curioso como se comporta el 1 que es
 ## educacion teriaria tiene menos varianza, pero se comporta en la media similarmente)
 
@@ -366,52 +379,35 @@ residuals1 <- residuals(pic1)
 pic2<- lm(log_salario_hora ~ sizeFirm + p6870 + oficio+ college + cotPension, df_filtered2)
 residuals2 <- residuals(pic2)
 pic3<- lm(log_salario_hora ~ female + sizeFirm + p6870 + oficio+ college+ cotPension, df_filtered2)
-
 length(pic1)
 length(pic2)
 
-reg_mujer_controles2 <- lm (residuals2 ~ residuals1 )
-
+reg_mujer_controles2 <- lm (residuals2 ~ residuals1)
 stargazer(reg_mujer_controles2, type="text", digits=7)
 stargazer(pic3, type="text", digits=7)
 
 ## ------- BOOTSRAP DE LA REGRESION(COEFICIENTE DE FEMALE)-------##
 mod1<- lm(log_salario_completo_hora ~ female +sizeFirm + p6870 + oficio + depto + college+ cotPension, df_filtered)
 stargazer(mod1,type="text", omit.stat=c("ser","f","adj.rsq"))
-
 str(mod1)
-
 mod1$coefficients
-
-
 set.seed(123)
 
 B<-1000 # Number of Repetions()
-
-
 eta_mod1<-rep(0,B)#this is an empty vector where we are going to save our elasticity estimates
 
-
 for(i in 1:B){
-  
   db_sample<- sample_frac(df_filtered,size=1,replace=TRUE) #takes a sample with replacement of the same size of the original sample (1 or 100%)
-  
   f<-lm(log_salario_completo_hora ~ female +sizeFirm + p6870 + oficio + depto + college+ cotPension,db_sample)# estimates the models
-  
   coefs<-f$coefficients[2] # gets the coefficient of interest that coincides with the elasticity of demand
-  
   eta_mod1[i]<-coefs #saves it in the above vector
 }
 
 length(eta_mod1)
-
 plot(hist(eta_mod1))
-
 ## este es el valor
 mean(eta_mod1)
-
 sqrt(var(eta_mod1))
-
 print(coefs)
 
 ##Segundo intento de boot##------------------------------------
