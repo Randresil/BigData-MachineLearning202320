@@ -1,16 +1,10 @@
 
 ---
- 'Problem Set #1'
+ # Problem Set #1: Predicting Income
 
-author: 'Elaborado por: Ricardo Silva, Fedrico Camacho, Andrés Chavarro & Juan David
-  Vélez P.'
+## Elaborado por: Ricardo Silva, Fedrico Camacho, Andrés Chavarro & Juan David Vélez P.
 
-date: "2023-09-18"
-output:
-  html_document: default
-  word_document: default
-  pdf_document: default
-subtitle: Predicting income
+## date: "2023-09-18"
 ---
 
 ## Datos empleados
