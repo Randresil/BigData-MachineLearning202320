@@ -108,6 +108,9 @@ df_filtered <- df_filtered %>% select(c("directorio", "secuencia_p", "orden", "c
                                         "microEmpresa", "fweight", "p6620", "cotPension") )  
 
 # Estad Descriptivas con Stargazer
+# Paginas ayuda paquete:
+# https://stackoverflow.com/questions/22878037/using-stargazer-in-r-without-knowing-anything-about-latex
+# https://www.princeton.edu/~otorres/NiceOutputR.pdf
 stargazer(df_filtered, title = "Estadísticas Descriptivas",
           type = "text", digits = 2)
 
@@ -190,14 +193,6 @@ hist(df_filtered$log_salario_completo_hora,
      col = "lightblue",
      border = "black")
 ## se observa mejor la distribucion de salario
-
-
-boxplot(df_filtered$log_salario_mensual,
-        main = "Income Distribution",
-        ylab = "Income",
-        col = "lightblue",
-        border = "red",
-        horizontal = TRUE)
 
 
 summary(df_filtered$p6426)
