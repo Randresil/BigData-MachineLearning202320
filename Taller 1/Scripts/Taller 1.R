@@ -348,22 +348,14 @@ summary(reghombre)
 regmujer_controles<- lm(log_salario_hora ~ female + sizeFirm + p6870 + oficio + depto + college+ cotPension, data=df_filtered)
 summary(regmujer_controles)
 
-
-## deberia funcionar, pero hay un problema de lenght y match
-pic1<- lm(female ~ sizeFirm + p6870 + oficio + depto + college+ cotPension, df_filtered)
-residuals1 <- residuals(pic1)
-
-pic2<- lm(log_salario_hora ~ sizeFirm + p6870 + oficio + depto + college+ cotPension, df_filtered)
-residuals2 <- residuals(pic2)
-
-reg_mujer_controles2 <- lm (residuals2 ~ residuals1 )
-
-stargazer(reg1,reg2,type="text",digits=7) 
-
 ## ------ i)FWL----------------------------------------------##
 ##intento con la media 
-
 df_filtered2 <- data.frame(df_filtered)
+
+df_filtered2 <- df_filtered2 %>% mutate(p6870 = as.factor(p6870), 
+                                        sizeFirm = as.factor(sizeFirm),
+                                        oficio = as.factor(oficio),
+                                        cotPension = as.factor(cotPension))
 
 media_variable <- mean(df_filtered2$log_salario_hora, na.rm = TRUE)
 df_filtered2$log_salario_hora[is.na(df_filtered2$log_salario_hora)] <- media_variable
@@ -424,41 +416,30 @@ print(coefs)
 
 ##Segundo intento de boot##------------------------------------
 #i) Encontrar residuales 1
-boot.fn <- function (data , index)
-  + resid (
-    lm(female ~ sizeFirm + p6870 + oficio + college + cotPension ,
-       data = data , subset = index)
+boot.fn <- function (data , index){
+  resid(lm(female ~ sizeFirm + p6870 + oficio + college + cotPension ,
+       data = data , subset = index))
+}
 
-  )
 set.seed (1)
 boot (df_filtered2 , boot.fn, 1000)
 
-summary (
-  lm(female ~ sizeFirm + p6870 + oficio + college + cotPension, data = df_filtered)
-)$resid
+summary(lm(female ~ sizeFirm + p6870 + oficio + college + cotPension, data = df_filtered))$resid
 
-residuals1.1 <- (
-  lm(female ~ sizeFirm + p6870 + oficio + college + cotPension, data = df_filtered)
-)$resid
+residuals1.1 <- (lm(female ~ sizeFirm + p6870 + oficio + college + cotPension, data = df_filtered))$resid
 
 #)ii Encontrar residuales 2 
+boot.fn <- function (data , index){
+  resid(lm(log_salario_hora ~ sizeFirm + p6870 + oficio + college + cotPension ,
+       data = data , subset = index))
+}
 
-boot.fn <- function (data , index)
-  + resid (
-    lm(log_salario_hora ~ sizeFirm + p6870 + oficio + college + cotPension ,
-       data = data , subset = index)
-    
-  )
 set.seed (1)
 boot (df_filtered2 , boot.fn, 1000)
 
-summary (
-  lm(log_salario_hora ~ sizeFirm + p6870 + oficio + college + cotPension, data = df_filtered)
-)$resid
+summary(lm(log_salario_hora ~ sizeFirm + p6870 + oficio + college + cotPension, data = df_filtered))$resid
 
-residuals1.2 <- (
-  lm(log_salario_hora ~ sizeFirm + p6870 + oficio + college + cotPension, data = df_filtered)
-)$resid
+residuals1.2 <- (lm(log_salario_hora ~ sizeFirm + p6870 + oficio + college + cotPension, data = df_filtered))$resid
 
 #)iii Bootstrap con residuales 
 
