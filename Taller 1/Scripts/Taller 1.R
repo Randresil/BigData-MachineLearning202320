@@ -407,7 +407,6 @@ ggplot(data = df_filtered, aes(x = age, y = log_salario_hora, color = female)) +
        title = "Edad vs Logaritmo del Salario por sexo")
 ggsave("~/Documents/GitHub/BigData-MachineLearning202320/Taller 1/Views/Edad_LogSalario_Sexo.png")
 
-
 log_w_age_female <- lm(log_salario_hora ~ age*female + I(age^2)*female, data = df_filtered)
 stargazer(log_w_age_female, type = "text")
 
@@ -455,7 +454,6 @@ residuals1.2 <- (lm(log_salario_hora ~ sizeFirm + p6870 + oficio + college + cot
 summary(lm(residuals1.2 ~ residuals1.1, data = df_filtered))$coef
 
 
-
 #================================================#
 #### [6.]  Ejercicio:  Predicting earnings    ####  
 #================================================#
@@ -493,15 +491,9 @@ model6 <- lm(log_salario_hora ~ poly(age, 8, raw = TRUE) + poly(maxEducLevel, 3,
 
 
 ## CREAR EXPERIENCIA (la que usamos es experiencia_ajustada2)
-
-
 df_filtered$resta_edad <- ifelse(df_filtered$age > 65, df_filtered$age - 65, 0)
 
 df_filtered$experiencia_ajustada <- ifelse(df_filtered$age > 65, df_filtered$age - df_filtered$resta_edad - df_filtered$maxEducLevel, df_filtered$age - df_filtered$maxEducLevel)
-
-
-
-
 
 model5 <- lm(log_salario_hora ~ poly(age, 3, raw = TRUE) + 
                poly(maxEducLevel, 2, raw = TRUE) + 
@@ -511,7 +503,6 @@ model5 <- lm(log_salario_hora ~ poly(age, 3, raw = TRUE) +
                clase, 
              data = train)
 model5
-
 coef (model5)
 paste("Coef:", mean(train$log_salario_hora,na.rm=TRUE))
 ## aqui genero la prediccion de mis datos que entrene sobre el tes
@@ -599,8 +590,6 @@ with(test,mean((log_salario_hora-model2)^2,na.rm=TRUE))
 
 ##------- JUNTAR TODO EN UNO--------#
 
-
-
 mse2 <- with(test,mean((log_salario_hora-model4)^2,na.rm=TRUE))
 mse4 <- with(test,mean((log_salario_hora-model4)^2,na.rm=TRUE))
 mse9 <- with(test,mean((log_salario_hora-model9)^2,na.rm=TRUE))
@@ -622,7 +611,6 @@ db
 ##parte d) LOOCV
 
 library(boot)
-
  glm.fit <- glm (mpg ~ horsepower , data = Auto)
  cv.err <- cv.glm (Auto, glm.fit)
  cv.err$delta
