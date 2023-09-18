@@ -415,55 +415,22 @@ sqrt(var(eta_mod1))
 print(coefs)
 
 ##Segundo intento de boot##------------------------------------
-#i) Encontrar residuales 1
+#i) Bootstrap con residuales
 boot.fn <- function (data , index){
-  resid(lm(female ~ sizeFirm + p6870 + oficio + college + cotPension ,
-       data = data , subset = index))
+  resid_fem <- resid(lm(female ~ sizeFirm + p6870 + oficio + college + cotPension ,
+                        data = data , subset = index))
+  resid_log <- resid(lm(log_salario_hora ~ sizeFirm + p6870 + oficio + college + cotPension ,
+                        data = data , subset = index))
+  
+  coef(lm(resid_log ~ resid_fem, data = data , subset = index))
 }
 
-set.seed (1)
-boot (df_filtered2 , boot.fn, 1000)
+set.seed (123456)
+boot(df_filtered2 , boot.fn, 1000)
 
-summary(lm(female ~ sizeFirm + p6870 + oficio + college + cotPension, data = df_filtered))$resid
-
-residuals1.1 <- (lm(female ~ sizeFirm + p6870 + oficio + college + cotPension, data = df_filtered))$resid
-
-#)ii Encontrar residuales 2 
-boot.fn <- function (data , index){
-  resid(lm(log_salario_hora ~ sizeFirm + p6870 + oficio + college + cotPension ,
-       data = data , subset = index))
-}
-
-set.seed (1)
-boot (df_filtered2 , boot.fn, 1000)
-
-summary(lm(log_salario_hora ~ sizeFirm + p6870 + oficio + college + cotPension, data = df_filtered))$resid
-
-residuals1.2 <- (lm(log_salario_hora ~ sizeFirm + p6870 + oficio + college + cotPension, data = df_filtered))$resid
-
-#)iii Bootstrap con residuales 
-
-boot.fn <- function (data , index)
-  + resid (
-    lm(log_salario_hora ~ sizeFirm + p6870 + oficio + college + cotPension ,
-       data = data , subset = index)
-    
-  )
-
-boot.fn <- function (data , index)
-  + coef (
-    lm(residuals1.2 ~ residuals1.1  ,
-       data = data , subset = index)
-    
-  )
-
-set.seed (1)
-boot (df_filtered2 , boot.fn, 1000)
-
-summary (
-  lm(residuals1.2 ~ residuals1.1, data = df_filtered)
-)$coef
-
+residuals1.1 <- (lm(female ~ sizeFirm + p6870 + oficio + college + cotPension, data = df_filtered2))$resid
+residuals1.2 <- (lm(log_salario_hora ~ sizeFirm + p6870 + oficio + college + cotPension, data = df_filtered2))$resid
+summary(lm(residuals1.2 ~ residuals1.1, data = df_filtered))$coef
 
 
 
