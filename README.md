@@ -43,8 +43,13 @@ df_filtered <- df_filtered %>% select(c("directorio", "secuencia_p", "orden", "c
 ```
 
 ```{r, echo=FALSE}
-stargazer(df_filtered, title = "Estadísticas Descriptivas",
-          type = "text", digits = 2)
+stargazer(df_filtered, title = "EstadC-sticas Descriptivas",
+          type = "text", digits = 2, covariate.labels = c("Directorio", "Secuencia-p", "Orden", "Clase", "Dominio", 
+                                                  "Mes", "Estrato1", "Sexo", "Edad", "Ingresos laborales Hora", "Ingresos laborales Mensual", 
+                                                  "Ingreso total Mensual", "Ingreso total Hora", "College", "Depto", "Empleado", "Formal", "EducaciC3n mC!xima", 
+                                                  "Parentesco Jefe Hogar", "Tiempo trabajando", "Seguridad Salud", "TamaC1o Firma", "Total horas trabajadas",
+                                                  "Micro Empresa", "Pesos frecuencia", "Otros ingresos", "Pensiones", "NC:mero personas en Firma", "OcupaciC3n"))
+
 
 ```
 
@@ -67,7 +72,9 @@ stargazer(model1,type="text")
 
 ### Interpretación
 
-\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_-\_---
+Al estimar la regresión que incluye únicamente las variables de edad y edad al cuadrado, nuestro objetivo es validar la hipótesis relacionada con la forma funcional y especificación adecuada del modelo. Si el estimador (beta) asociado al término que contiene la edad al cuadrado es negativo, esto indica una relación cóncava entre el ingreso y la edad. Este hallazgo respalda la hipótesis de que el ingreso por edad alcanza un punto máximo y, a partir de ahí, disminuye.
+Al correr el modelo, observamos un primer estimador con un signo positivo, lo que sugiere un efecto de aumento del salario por hora en función de la edad. Específicamente, un incremento de un año en la edad conlleva un aumento positivo del 6,702% en el salario por hora en términos logarítmicos. También podemos interpretar que hay aumentos salariales cercanos al 70% por cada década adicional de edad.
+Por otro lado, el signo negativo del segundo estimador, que explora la relación cuadrática, nos indica la presencia de concavidad en la relación. El valor de este estimador es -0,0007394, ilustrando que, al ser la relación cuadrática y penalizar los valores altos de edad, cada incremento en edad se traduce en aumentos salariales menores debido a esta penalización inherente a la naturaleza cuadrática de la relación.
 
 ```{r, echo=FALSE}
 ggplot(df_filtered, aes(x = age2, y = log_salario_hora)) +
@@ -90,6 +97,23 @@ Con la intención de analizar la brecha salarial condicional al genero se estim�
 regmujer<- lm(log_salario_hora ~ female, data=df_filtered)
 ```
 
-```{r, echo=FALSE}
-stargazer(regmujer,type="text")
-```
+#### *Modelo no condicional Vs Modelo condicional*
+
+                *Dependent variable:*
+                log_salario_hora
+|         |   Modelo Incondicional | Modelo Condicional |
+|---------------|:-------------:|---------:|
+|    Mujer      | 	-0.045***   | -0.020** |
+|               |    (0.015)    | (0.009)  |
+|---------------|:-------------:|---------:|
+| Ovservations  |     9,892     |  16,542  |
+|     R2        |     0.001     |  0.324   |
+|  Ajusted  R2  |     0.001     |  0.324   |
+|   Residual Std. Error |   0.727 (df = 9890) |0.463 (df = 16450)|
+|  F Statistic  |    9.317*** (df = 1; 9890)    | 87.960*** (df = 91; 16450)   |
+          Note:	*p<0.1; **p<0.05; ***p<0.01
+
+### Interpretación
+Realizaremos una comparación de los salarios sin controles, otras estimaciones con controles, con el objetivo de clarificar si esta brecha se genera a raíz de la diferenciación entre trabajadores, y cómo última cuestión compararemos la edad “peak” de los hombres con el de las mujeres.
+
+Como una primera aproximación ante el problema se realizó la siguiente regresión *log⁡(salario) = β_(0 )+ β_(1 ) Female + *u; en esta podemos ver que se da un coeficiente de – 4%, pensando en que nuestra variable base es hombre tenemos que en promedio las mujeres están recibiendo 4% menos salario que los hombres. 
