@@ -1,5 +1,3 @@
-# BigData-MachineLearning202320
-Repositorio para los talleres trabajados en R para la clase de Big Data y Machine Learning para economía aplicada de la Universidad de Los Andes.
 ---
 title: 'Problem Set #1'
 author: 'Elaborado por: Ricardo Silva, Fedrico Camacho, Andrés Chavarro & Juan David
